@@ -1,0 +1,37 @@
+<<!DOCTYPE html> 
+<html> 
+<head> 
+<title></title> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+
+<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css"> 
+<link rel="stylesheet" type="text/css" href="/css/styles.css"> 
+<script type="text/javascript" src="/js/jquery.min.js"></script> 
+<script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script> 
+</head> 
+
+<body> 
+<div class="header" style="text-align: center"> 
+<a href="/home">Home</a> 
+{% ifequal session.id nil %} 
+<a class="btn btn-primary" href="/auth">Sign in</a> 
+<a class="btn btn-primary" href="/signup">Sign up</a> 
+{% else %} 
+<a href="/noteboard">NoteBoard</a> 
+{% ifequal session.role 0 %} 
+<a href="/flush">Flush</a> 
+{% endifequal %} 
+<a href="/invoices">Invoices: {% ifequal invoices nil %}0{% else %}{{invoices}}{% endifequal %}</a> 
+<form action="/user/logoff" method="post"> 
+<button type="submit">Log off</button> 
+</form> 
+{% endifequal %} 
+</div> 
+
+<div class="container"> 
+{% block content %} 
+{% endblock %} 
+</div> 
+
+</body>
+
