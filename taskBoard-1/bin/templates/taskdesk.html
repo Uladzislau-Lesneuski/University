@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <p>
+        <a href="/taskdesk/task/new">Create new task</a>
+        <a href="/taskdesk/group/new">Create new group</a>
+    </p>
+    <table>
+        <tr>
+            {% for group in groups %}
+                <td>
+                    <table>
+                        <tr>
+                            <td colspan="2">
+                                <div class="header">
+                                    {{group.name}}
+                                    <a href="/taskdesk/group/delete/{{group.id}}">Delete group</a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {% for task in tasks %}
+                            {% ifequal task.group group.id %}
+                                <tr>
+                                    <td>Author</td>
+                                    <td>{{task.author}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Date</td>
+                                    <td>{{task.date}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Title</td>
+                                    <td>{{task.title}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Description</td>
+                                    <td>{{task.description}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Milestone</td>
+                                    <td>{{task.milestone}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Assignee</td>
+                                    <td>{{task.assignee}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Status</td>
+                                    <td>{{task.status}}</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <a class="btn btn-default" href="/taskdesk/task/{{task.id}}">Edit</a>
+                                    </td>
+                                    <td>
+                                        <a href="/taskdesk/task/delete/{{task.id}}">Delete</a>
+                                    </td>
+                                </tr>
+                            {% endifequal %}
+                        {% endfor %}
+                    </table>
+                </td>
+            {% endfor %}
+        </tr>
+    </table>
+</div>
+
+{% endblock %}

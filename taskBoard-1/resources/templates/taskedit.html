@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <div class="task">
+        {% ifequal task nil %}
+        {% else %}
+            <table>
+                <tr>
+                    <td>Author</td>
+                    <td>{{task.author}}</td>
+                </tr>
+                <tr>
+                    <td>Date</td>
+                    <td>{{task.date}}</td>
+                </tr>
+            </table>
+        {% endifequal %}
+        <form action="/{% ifequal task nil %}taskadd{% else %}taskedit{% endifequal %}" method="post">
+            <p style="display: none">
+                <input name="id" id="id" value="{{task.id}}"/>
+            </p>
+            <p>
+                <label for="title">Title</label>
+                <input name="title" id="title" value="{{task.title}}" />
+            </p>
+            <p>
+                <label for="description">Description</label>
+                <textarea name="description" id="description">{{task.description}}</textarea>
+            </p>
+            <p>
+                <label for="milestone">Milestone</label>
+                <input name="milestone"
+                       id="milestone"
+                       type="date"
+                       value="{{task.milestone}}"/>
+            </p>
+            <p>
+                <label for="assignee">Assignee</label>
+                <select name="assignee" id="assignee">
+                    {% for user in users %}
+                        {% ifequal user.name task.assignee %}
+                            <option selected="selected">{{user.name}}</option>
+                        {% else %}
+                            <option>{{user.name}}</option>
+                        {% endifequal %}
+                    {% endfor %}
+                </select>
+            </p>
+            <p>
+                <label for="status">Status</label>
+                <select name="status" id="status">
+                    {% for stat in stats %}
+                        {% ifequal stat.name task.status %}
+                            <option selected="selected">{{stat.name}}</option>
+                        {% else %}
+                            <option>{{stat.name}}</option>
+                        {% endifequal %}
+                    {% endfor %}
+                </select>
+            </p>
+            <p>
+                <label for="group">Group</label>
+                <select name="group" id="group">
+                    {% for group in groups %}
+                        {% ifequal group.name task.group %}
+                            <option selected="selected">{{group.name}}</option>
+                        {% else %}
+                            <option>{{group.name}}</option>
+                        {% endifequal %}
+                    {% endfor %}
+                </select>
+            </p>
+
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <div class="group">
+        {% ifequal group nil %}
+        <div>Добавление группы</div>
+        {% else %}
+        <div>Изменение группы</div>
+        {% endifequal %}
+        <form action="/{% ifequal group nil %}groupadd{% else %}groupedit{% endifequal %}" method="post">
+            <p style="display: none">
+                <input name="id" id="id" value="{{group.id}}"/>
+            </p>
+            <p>
+                <label for="name">Name</label>
+                <input name="name" id="name" value="{{group.name}}" />
+            </p>
+
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
