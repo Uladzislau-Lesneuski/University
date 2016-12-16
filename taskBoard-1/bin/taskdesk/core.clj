@@ -51,9 +51,7 @@
                  (assoc :id (:id user)))))
 
 (defn remove-user-from-session [response]
-  (assoc response
-    :cookies {"id" {:value nil}}
-    ))
+  (assoc response :session nil))
 
 (defn get-user-from-session [request]
   (def user-info {:id (get-in request [:session :userid])
@@ -85,6 +83,19 @@
   [session login]
   (do
       (view/render-user-page (.get-user-by-login user-service login) session)))
+
+(defn logout
+  []
+  ;(ls/close-log)
+  (-> (response/redirect "/home")
+      (remove-user-from-session)))
+
+(defn make-a-flush
+  [session]
+  (when (= (:role session) 0)
+    (println "\n\n" session "\n\n")
+    (ls/flush)
+    (response/redirect "/home")))
 
 
 ;; ----------------------------- TASK ACTIONS ----------------------------
@@ -146,9 +157,8 @@
   (POST "/signup" request (add-user request)
                           (response/redirect "/home"))
   (GET "/user/:login" [:as request login] (show-user-page (:session request) login))
-  (POST "/user/logoff" request (ls/close-log)
-                               (remove-user-from-session request)
-                               (response/redirect "/home"))
+  (POST "/user/logoff" [:as request] (logout))
+  (GET "/flush" [:as request] (make-a-flush (:session request)))
   
 ;;Tasks          
   (GET "/taskdesk" [:as request] (show-taskdesk (:session request)))
