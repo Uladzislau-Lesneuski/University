@@ -1,7 +1,8 @@
 (ns noteBoard.logic.services.user-service
   (:require [noteBoard.logic.protocols.user-service-protocol :as user-protocol]
             [noteBoard.logic.protocols.common-service-protocol :as common-protocol]
-            [noteBoard.dal.dao.user-data-access-object :as user-model]
+            [noteBoard.data.dao.user-data-access-object :as user-model]
+            [noteBoard.validation.user-validation :refer :all]
             ))
 
 (deftype user-service [user-model]
@@ -14,7 +15,9 @@
 
   (add-item-over 
     [this options]
-    (.add-item-over user-model options))
+    (if (is-blanc-fields? (:login options) (:password options) (:name options) (:email options))
+      (do
+        (.add-item-over user-model options))))
 
   user-protocol/user-service-protocol
 

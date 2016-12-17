@@ -1,17 +1,18 @@
 (ns noteBoard.core
   (:use compojure.core
         ring.middleware.cookies)
-  (:require [noteBoard.dal.db :as db]
+  (:require [noteBoard.data.db :as db]
             [noteBoard.views.view :as view]
-            [noteBoard.dal.dao.user-data-access-object :as user-dao]
-            [noteBoard.dal.dao.note-data-access-object :as note-dao]
-            [noteBoard.dal.dao.group-data-access-object :as group-dao]
-            [noteBoard.dal.dao.status-data-access-object :as stat-dao]
+            [noteBoard.data.dao.user-data-access-object :as user-dao]
+            [noteBoard.data.dao.note-data-access-object :as note-dao]
+            [noteBoard.data.dao.group-data-access-object :as group-dao]
+            [noteBoard.data.dao.status-data-access-object :as stat-dao]
             [noteBoard.logic.services.user-service :as user-service-d]
             [noteBoard.logic.services.note-service :as note-service-d]
             [noteBoard.logic.services.group-service :as group-service-d]
             [noteBoard.logic.services.status-service :as stat-service-d]
             [noteBoard.logic.services.log-service :as ls]
+            [noteBoard.logic.invoice-center :as ic]
 
             [compojure.route :as route]
             [compojure.handler :as handler]
@@ -71,6 +72,7 @@
       (println "We dont have such user")
       (do
         (ls/log-signin (:name current-user))
+        (ic/handle-sign-in (:name current-user))
         (-> (response/redirect (str "user/" request-login))
             (add-user-to-session request current-user))))))
 
@@ -85,6 +87,7 @@
 
 (defn logout
   []
+  ;(ls/close-log)
   (-> (response/redirect "/home")
       (remove-user-from-session)))
 
@@ -94,6 +97,7 @@
     (println "\n\n" session "\n\n")
     (ls/flush)
     (response/redirect "/home")))
+
 
 
 ; note ACTIONS
@@ -129,7 +133,7 @@
     (if (empty? session)
       (response/redirect "/home")
       (do
-        (.delete-item note-servise id)
+        (.delete-item note-servise id session)
         (response/redirect "/noteboard")))))
 
 (defn handle-note-edit-post
@@ -143,8 +147,20 @@
   (.add-item note-servise note-info session)
   (response/redirect "/noteboard"))
 
+; INVOICE ACTIONS
+ 
+ (defn open-invoices-page
+   [session]
+   (view/render-invoice-page session))
+ 
+ (defn handle-invoice-close
+   [session id]
+   (ic/remove-invoice (:name session) id)
+   (println session id)
+   (response/redirect "/invoices"))
+ 
 
-; ROUTES
+
 (defroutes app-routes
 ;Users
   (GET "/" [] (response/redirect "/home"))
@@ -158,7 +174,7 @@
   (POST "/user/logoff" [:as request] (logout))
   (GET "/flush" [:as request] (make-a-flush (:session request)))
   
-;;notes          
+;notes          
   (GET "/noteboard" [:as request] (show-noteBoard (:session request)))
   (GET "/noteboard/note/:id" [:as request id] (show-noteBoard-edit (:session request) id))
   (GET "/noteboard/note/new" [:as request] (show-noteBoard-edit (:session request) nil))
@@ -166,13 +182,17 @@
   (POST "/noteedit" [:as request] (handle-note-edit-post (:params request) (:session request)))
   (POST "/noteadd" [:as request] (handle-note-add-post (:params request) (:session request)))
 
-;;Groups
+;Groups
   (GET "/noteboard/group/new" [:as request] (view/render-edit-group nil (:session request)))
   (GET "/noteboard/group/delete/:id" [id] (.delete-item group-service id)
                                          (response/redirect "/noteboard"))
 
   (POST "/groupadd" request (.add-item-over group-service request)
                             (response/redirect "/noteboard"))
+  
+;Invoices
+           (GET "/invoices" [:as request] (open-invoices-page (:session request)))
+           (POST "/invoices/delete" [:as request] (handle-invoice-close (:session request) (:id (:params request))))  
 
   (route/not-found "Page not found")
   (route/resources "/"))

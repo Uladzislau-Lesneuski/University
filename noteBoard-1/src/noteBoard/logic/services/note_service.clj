@@ -4,7 +4,7 @@
             [noteBoard.logic.services.log-service :as ls]
             [noteBoard.logic.invoice-center :as ic]
             [noteBoard.validation.note-validation :refer :all]
-            [noteBoard.dal.dao.note-data-access-object :as note-dao])
+            [noteBoard.data.dao.note-data-access-object :as note-dao])
   (import java.util.Date)
   (import java.text.SimpleDateFormat))
 
@@ -22,6 +22,9 @@
     [this options session]
     (let [options (assoc options :date (.format (SimpleDateFormat. "yyyy-MM-dd HH:mm:ss")(Date.)))
           options (assoc options :author (:name session))]
+      (ls/log-note-edit (:author options) (:title options) false)
+      (ic/add-invoice (:assignee options) (str "User ("(:name session)") assigned note: ("
+                                               (:title options)") for you."))
       (if (is-correct-date? (:milestone options))
         (do
           (ls/log-note-edit (:author options) (:title options) false)
@@ -37,7 +40,9 @@
     [this note-opts session]
     (if (is-correct-date? (:milestone note-opts))
       (do
-        (ic/add-invoice (:assignee note-opts) (str "User (" (:name session) ") changed your note: (" (:title note-opts) ")"))
+        
+        (ic/add-invoice (:assignee note-opts) (str "User ("(:name session)") changed your/assigned you to/disassigned you from note: ("
+                                                   (:title note-opts)")"))
         (ls/log-note-edit (:name session) (:title note-opts) true)
         (.edit-note note-dao note-opts))
       (println "Incorrect date")
@@ -49,5 +54,7 @@
     (.get-by-id note-dao id))
 
   (delete-item
-    [this id]
-    (.delete-item note-dao id)))
+ [this id session]
+     (do
+       (ls/log-note-delete (:name session) id)
+       (.delete-item note-dao id))))

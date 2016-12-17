@@ -16,15 +16,17 @@
 {% ifequal session.id nil %} 
 <a class="btn btn-primary" href="/auth">Sign in</a> 
 <a class="btn btn-primary" href="/signup">Sign up</a> 
+
 {% else %} 
-<a href="/noteboard">NoteBoard</a> 
-{% ifequal session.role 0 %} 
-<a href="/flush">Flush</a> 
-{% endifequal %} 
-<a href="/invoices">Invoices: {% ifequal invoices nil %}0{% else %}{{invoices}}{% endifequal %}</a> 
+<a href="/noteboard">noteBoard</a>
+{% ifequal session.role 0 %}
+<a href="/flush">Flush</a>
+{% endifequal %}
+<a class href="/invoices">Invoices: {% ifequal invoices nil %}0{% else %}{{invoices}}{% endifequal %}</a>
 <form action="/user/logoff" method="post"> 
 <button type="submit">Log off</button> 
 </form> 
+
 {% endifequal %} 
 </div> 
 
